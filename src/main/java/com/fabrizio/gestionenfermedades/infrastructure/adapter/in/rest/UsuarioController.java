@@ -72,4 +72,40 @@ public class UsuarioController {
         usuarioUseCase.eliminar(username);
         return ResponseEntity.noContent().build();
     }
+
+        // REPORTE PARAMETRIZADO 1:
+    // Busca usuarios cuyo nombre contenga el texto enviado
+    @GetMapping("/reportes/nombre")
+    public ResponseEntity<List<Usuario>> reportePorNombre(
+            @RequestParam String nombre) {
+
+        List<Usuario> resultado = usuarioUseCase.listarTodos()
+                .stream()
+                .filter(usuario ->
+                        usuario.getNombre() != null &&
+                        usuario.getNombre()
+                                .toLowerCase()
+                                .contains(nombre.toLowerCase()))
+                .toList();
+
+        return ResponseEntity.ok(resultado);
+    }
+
+    // REPORTE PARAMETRIZADO 2:
+    // Busca usuarios cuyo correo contenga el texto enviado
+    @GetMapping("/reportes/email")
+    public ResponseEntity<List<Usuario>> reportePorEmail(
+            @RequestParam String email) {
+
+        List<Usuario> resultado = usuarioUseCase.listarTodos()
+                .stream()
+                .filter(usuario ->
+                        usuario.getEmail() != null &&
+                        usuario.getEmail()
+                                .toLowerCase()
+                                .contains(email.toLowerCase()))
+                .toList();
+
+        return ResponseEntity.ok(resultado);
+    }
 }
