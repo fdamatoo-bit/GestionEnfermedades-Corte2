@@ -20,19 +20,36 @@ public class JwtInterceptor implements HandlerInterceptor {
             HttpServletResponse response,
             Object handler) {
 
-        String authorization = request.getHeader("Authorization");
+        String metodo = request.getMethod();
+        String ruta = request.getRequestURI();
+
+        // Permitir registro de usuario sin token
+        if ("POST".equalsIgnoreCase(metodo)
+                && "/api/usuarios".equals(ruta)) {
+            return true;
+        }
+
+        String authorization =
+                request.getHeader("Authorization");
 
         if (authorization == null ||
                 !authorization.startsWith("Bearer ")) {
 
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setStatus(
+                    HttpServletResponse.SC_UNAUTHORIZED
+            );
+
             return false;
         }
 
         String token = authorization.substring(7);
 
         if (!jwtService.validarToken(token)) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+
+            response.setStatus(
+                    HttpServletResponse.SC_UNAUTHORIZED
+            );
+
             return false;
         }
 

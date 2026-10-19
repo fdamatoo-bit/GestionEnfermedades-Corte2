@@ -15,15 +15,15 @@ public class WebConfig implements WebMvcConfigurer {
     }
 
     @Override
-    public void addInterceptors(InterceptorRegistry registry) {
+    public void addInterceptors(
+            InterceptorRegistry registry) {
 
         registry.addInterceptor(jwtInterceptor)
                 .addPathPatterns(
+                        "/api/usuarios",
                         "/api/usuarios/**",
+                        "/api/enfermedades",
                         "/api/enfermedades/**"
-                )
-                .excludePathPatterns(
-                        "/api/usuarios"
                 );
     }
 }
