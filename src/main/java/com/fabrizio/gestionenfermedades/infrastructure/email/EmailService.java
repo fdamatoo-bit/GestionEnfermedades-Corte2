@@ -1,26 +1,50 @@
 package com.fabrizio.gestionenfermedades.infrastructure.email;
 
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
+
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class EmailService {
 
-    private final JavaMailSender mailSender;
+    private final String brevoApiKey;
+    private final String senderEmail;
+    private final RestClient restClient;
 
-    public EmailService(JavaMailSender mailSender) {
-        this.mailSender = mailSender;
+    public EmailService(
+            @Value("${brevo.api-key}") String brevoApiKey,
+            @Value("${brevo.sender-email}") String senderEmail) {
+
+        this.brevoApiKey = brevoApiKey;
+        this.senderEmail = senderEmail;
+
+        this.restClient = RestClient.builder()
+                .baseUrl("https://api.brevo.com")
+                .build();
     }
 
-    public void enviarRecordatorioClave(String destinatario, String nombre, String password) {
+    public void enviarRecordatorioClave(
+            String destinatario,
+            String nombre,
+            String password) {
 
-        SimpleMailMessage mensaje = new SimpleMailMessage();
-
-        mensaje.setTo(destinatario);
-        mensaje.setSubject("Recordatorio de clave - Gestion de Enfermedades");
-
-        mensaje.setText(
+        Map<String, Object> cuerpo = Map.of(
+                "sender", Map.of(
+                        "name", "Gestion de Enfermedades",
+                        "email", senderEmail
+                ),
+                "to", List.of(
+                        Map.of(
+                                "email", destinatario,
+                                "name", nombre
+                        )
+                ),
+                "subject", "Recordatorio de clave - Gestion de Enfermedades",
+                "textContent",
                 "Hola " + nombre + ",\n\n" +
                 "Se ha solicitado un recordatorio de tu clave.\n\n" +
                 "Tu clave registrada es: " + password + "\n\n" +
@@ -28,6 +52,12 @@ public class EmailService {
                 "Fabrizio Antonio D'Amato Osorio"
         );
 
-        mailSender.send(mensaje);
+        restClient.post()
+                .uri("/v3/smtp/email")
+                .header("api-key", brevoApiKey)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(cuerpo)
+                .retrieve()
+                .toBodilessEntity();
     }
 }
