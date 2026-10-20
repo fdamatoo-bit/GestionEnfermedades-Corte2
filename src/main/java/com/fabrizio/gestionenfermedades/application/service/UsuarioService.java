@@ -17,6 +17,23 @@ public class UsuarioService implements UsuarioUseCase {
 
     @Override
     public Usuario crear(Usuario usuario) {
+
+        if (usuario.getUsername() != null) {
+            usuario.setUsername(usuario.getUsername().trim());
+        }
+
+        if (usuario.getPassword() != null) {
+            usuario.setPassword(usuario.getPassword().trim());
+        }
+
+        if (usuario.getNombre() != null) {
+            usuario.setNombre(usuario.getNombre().trim());
+        }
+
+        if (usuario.getEmail() != null) {
+            usuario.setEmail(usuario.getEmail().trim());
+        }
+
         return usuarioRepositoryPort.guardar(usuario);
     }
 
